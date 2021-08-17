@@ -1,3 +1,11 @@
-> 1%
-last 2 versions
-not dead
+# 这个值会被@babel/preset-env和Autoprefixer用来确定需要转译的JavaScript特性和需要添加的CSS浏览器前缀
+
+# 兼容到超过1%的用户使用的浏览器都要兼容
+#> 1%
+# 兼容到最新的两个版本
+#last 2 versions
+# 没有死掉的浏览器
+# not dead
+
+Android >= 4.0
+iOS >= 8
