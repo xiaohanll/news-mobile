@@ -25,9 +25,11 @@
           name="mobile"
           :rules="formRules.mobile"
         />
+        <!-- 通过设置clearable在输入过程中展示清除图标。 -->
         <van-field
           v-model="user.code"
           clearable
+          center
           icon-prefix = "news"
           left-icon="yanzhengma"
           placeholder="请输入验证码"
@@ -47,6 +49,7 @@
           class="send-btn"
           round
           v-else
+          :loading="isSendSmsLoading"
           @click="onSendSms"
           >发送验证码</van-button>
         </template>
@@ -84,10 +87,12 @@ export default {
           { required: true, message: '请输入验证码' },
           { pattern: /^\d{6}$/, message: '请输入正确的验证码' }]
       },
-      isCountDownShow: false // 控制倒计时和验证码盒子的显示状态
+      isCountDownShow: false, // 控制倒计时和验证码盒子的显示状态
+      isSendSmsLoading: false // 发送验证码按钮的loading状态
     }
   },
   methods: {
+    // 登录
     async onLogin () {
       Toast.loading({
         message: '登录中...',
@@ -101,12 +106,15 @@ export default {
         const res = await login(this.user)
         console.log(res)
         Toast.success('登录成功')
+        // 将后端返回的token放大vuex的容器中
+        this.$store.commit('setUser', res.data.data)
       } catch (err) {
         console.log(err)
         Toast.fail('登录失败')
       }
       // 4.处理响应结果
     },
+    // 提交失败
     onFailed (error) {
       if (error.errors[0]) {
         this.$toast({
@@ -115,11 +123,14 @@ export default {
         })
       }
     },
+    // 发送验证码
     async onSendSms () {
       // 校验手机号码是否正确
       try {
         // 正确情况
         await this.$refs['login-form'].validate('mobile')
+        // 点击完“发送验证码”按钮后，显示loading状态，以防网络有延迟时，用户误以为没点上导致多次点击
+        this.isSendSmsLoading = true
         // 验证通过请求发送验证码
         await sendSms(this.user.mobile)
         // 等请求完发送验证码之后，显示倒计时
@@ -141,12 +152,14 @@ export default {
           position: 'top'
         })
       }
+      // 无论验证码是否发送失败，最后都要关闭“发送验证码”按钮的loading状态
+      this.isSendSmsLoading = false
     }
     // onSendSms () {
     //   // 验证手机号码的正确性,validate返回值是一个promise
     //   this.$refs['login-form'].validate('mobile').then(
     //     data => { console.log(data) }
-    //   )
+    //   ).catch()
     //   // 验证通过=>请求发送验证码=>用户接收短信=>输入验证码=>请求登录
     //   // 请求发送验证码之后要显示倒计时，隐藏按钮
     //   // 倒计时结束之后显示按钮，隐藏倒计时
