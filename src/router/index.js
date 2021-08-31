@@ -12,6 +12,7 @@ const routes = [
   {
     path: '/',
     component: () => import('@/views/layout/'),
+    // 配置子路由
     children: [
       {
         // 默认子路由

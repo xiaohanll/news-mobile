@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="login-container">
-      <!-- 登录标题 -->
+      <!-- 登录标题,$router.back()返回，路由为hash模式 -->
       <van-nav-bar
         title="登录"
         left-arrow
@@ -9,6 +9,7 @@
         class="app-nav-bar"
       />
       <!-- 登录表单 -->
+      <!-- submit：提交表单且验证通过后触发，与点击提交按钮的效果等价 -->
       <van-form
         @submit="onLogin"
         @failed="onFailed"
@@ -17,6 +18,7 @@
         ref="login-form"
         validate-first
       >
+      <!-- 手机号输入框 -->
         <van-field
           v-model="user.mobile"
           icon-prefix = "news"
@@ -26,9 +28,9 @@
           :rules="formRules.mobile"
         />
         <!-- 通过设置clearable在输入过程中展示清除图标。 -->
+        <!-- 密码输入框 -->
         <van-field
           v-model="user.code"
-          clearable
           center
           icon-prefix = "news"
           left-icon="yanzhengma"
@@ -36,31 +38,36 @@
           name="code"
           :rules="formRules.code"
         >
+        <!-- 发送验证码的按钮 -->
         <template #button>
           <!-- @finish事件：倒计时结束后显示验证码盒子 -->
+          <!-- 倒计时盒子 -->
           <van-count-down
           v-if="isCountDownShow"
           :time="60000"
           format=" ss s"
+          round
           @finish="isCountDownShow = false"
           />
+          <!-- 发送验证码盒子 -->
           <van-button
           size="mini"
           class="send-btn"
           round
           v-else
           :loading="isSendSmsLoading"
-          @click="onSendSms"
+          @click.prevent="onSendSms"
           >发送验证码</van-button>
         </template>
         </van-field>
-        <!-- 登录的大按钮 -->
+        <!-- 登录按钮 -->
         <div class="login-btn-wrap">
           <van-button class="login-btn"
           type="primary"
           block
           @click="onLogin"
           >登录</van-button>
+          <!-- 点击登录按钮，触发onLogin函数 -->
         </div>
       </van-form>
     </div>
@@ -94,22 +101,25 @@ export default {
   methods: {
     // 登录
     async onLogin () {
+      // toast轻提示组件，loading加载提示，弹出一个方框显示：登陆中...
       Toast.loading({
         message: '登录中...',
         forbidClick: true, // 禁止背景点击，就是说登录中禁止点击
-        duration: 0
+        duration: 0 // 展示时长，单位为毫秒，当值为0时提示不消失
       })
       // 1.找到数据接口
       // 2.封装请求方法
       // 3.请求调用登录
-      try {
-        const res = await login(this.user)
+      try { // 使用try{}catch(err){}捕获异常，
+        const res = await login(this.user) // 携带user信息，发送登录请求login(this.user)，等响应数据返回再执行下面的代码
         console.log(res)
         Toast.success('登录成功')
         // 将后端返回的token放大vuex的容器中
         this.$store.commit('setUser', res.data.data)
+        // 登录成功，跳转到原来的页面
+        this.$router.push('/my')
       } catch (err) {
-        console.log(err)
+        // console.log(err)
         Toast.fail('登录失败')
       }
       // 4.处理响应结果
@@ -128,10 +138,11 @@ export default {
       // 校验手机号码是否正确
       try {
         // 正确情况
+        // 验证表单，支持传入name来验证单个或部分表单项，验证有没有输入手机号
         await this.$refs['login-form'].validate('mobile')
         // 点击完“发送验证码”按钮后，显示loading状态，以防网络有延迟时，用户误以为没点上导致多次点击
         this.isSendSmsLoading = true
-        // 验证通过请求发送验证码
+        // 验证通过后，调用user.js中的sendSms(),请求发送验证码
         await sendSms(this.user.mobile)
         // 等请求完发送验证码之后，显示倒计时
         this.isCountDownShow = true
@@ -154,6 +165,7 @@ export default {
       }
       // 无论验证码是否发送失败，最后都要关闭“发送验证码”按钮的loading状态
       this.isSendSmsLoading = false
+      this.isCountDownShow = false
     }
     // onSendSms () {
     //   // 验证手机号码的正确性,validate返回值是一个promise

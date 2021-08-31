@@ -15,5 +15,19 @@ export const sendSms = mobile => {
   return request({
     method: 'GET',
     url: `/app/v1_0/sms/codes/${mobile}`
+    // 使用${}拼接时要用` `包裹
+  })
+}
+
+// 获取登录用户信息
+export const getCurrentUser = () => {
+  return request({
+    method: 'GET',
+    url: '/app/v1_0/user'
+    // headers: {
+    //   Authorization: `Bearer ${store.state.user.token}`
+    //   // Content-Type:
+    // }
+    // 使用${}拼接时要用` `包裹
   })
 }
