@@ -2,6 +2,7 @@ import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
 import store from './store'
+import './utils/dayjs'
 // 加载vant组件
 import Vant from 'vant'
 // 加载Vant组件库样式

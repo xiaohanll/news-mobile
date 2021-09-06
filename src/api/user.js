@@ -1,4 +1,4 @@
-
+// import store from '@/store/'
 import request from '@/utils/request'
 
 // 登录请求
@@ -29,5 +29,13 @@ export const getCurrentUser = () => {
     //   // Content-Type:
     // }
     // 使用${}拼接时要用` `包裹
+  })
+}
+
+// 获取首页频道列表
+export const getUserChannels = () => {
+  return request({
+    method: 'GET',
+    url: '/app/v1_0/user/channels'
   })
 }
